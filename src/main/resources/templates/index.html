@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Consulta de Aniversariantes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ffd700;
+            --text-color: #333;
+            --border-radius: 15px;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .search-card {
+            background: var(--secondary-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            transition: transform 0.3s ease;
+        }
+
+        .search-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .result-area {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            margin-top: 30px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .birthday-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--accent-color);
+            transition: transform 0.3s ease;
+            white-space: nowrap; /* Impede quebras de linha */
+            overflow: hidden;    /* Esconde excesso de texto */
+            text-overflow: ellipsis; /* Adiciona reticências para textos longos */
+        }
+
+        .birthday-card:hover {
+            transform: translateX(10px);
+        }
+
+        .birthday-icon {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            padding: 15px 20px;
+        }
+
+        .alert-danger {
+            background-color: #ffe5e5;
+            border-color: #ffcccc;
+            color: #cc0000;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .animation-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-balloon {
+            position: absolute;
+            animation: float 15s infinite linear;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<!-- Animação de fundo com balões -->
+<div class="animation-container">
+    <i class="fas fa-birthday-cake floating-balloon" style="left: 10%; animation-delay: 0s;"></i>
+    <i class="fas fa-gift floating-balloon" style="left: 30%; animation-delay: 3s;"></i>
+    <i class="fas fa-star floating-balloon" style="left: 50%; animation-delay: 6s;"></i>
+    <i class="fas fa-balloon floating-balloon" style="left: 70%; animation-delay: 9s;"></i>
+    <i class="fas fa-party-horn floating-balloon" style="left: 90%; animation-delay: 12s;"></i>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-birthday-cake"></i>
+            Consulta de Aniversariantes
+        </h1>
+        <p class="page-subtitle">Descubra quem está fazendo aniversário!</p>
+    </div>
+
+    <div class="search-card">
+        <form action="/buscar" method="post" id="searchForm">
+            <div class="mb-4">
+                <label for="data" class="form-label">
+                    <i class="fas fa-calendar-alt"></i>
+                    Data para consulta:
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="data"
+                       name="data"
+                       th:value="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}"
+                       placeholder="DD/MM/YYYY">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Consultar
+            </button>
+        </form>
+    </div>
+
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <p>Buscando aniversariantes...</p>
+    </div>
+
+    <div th:if="${erro}" class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${erro}"></span>
+    </div>
+
+    <div th:if="${resultado}" class="result-area">
+        <pre th:text="${resultado}" style="white-space: pre-wrap; font-size: 1.2rem;"></pre>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    // Inicialização do datepicker
+    flatpickr("#data", {
+        dateFormat: "d/m/Y",
+        locale: "pt",
+        allowInput: true
+    });
+
+    // Manipulação do formulário com loading
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        document.querySelector('.loading-spinner').style.display = 'block';
+    });
+
+    // Máscara para o campo de data
+    document.getElementById('data').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) value = value.slice(0,2) + '/' + value.slice(2);
+        if (value.length >= 5) value = value.slice(0,5) + '/' + value.slice(5);
+        if (value.length >= 10) value = value.slice(0,10);
+        e.target.value = value;
+    });
+</script>
+</body>
+</html>
